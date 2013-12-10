@@ -133,7 +133,7 @@
       <extension>
         <groupId>com.pcl-solutions.maven.wagons</groupId>
         <artifactId>rsync-maven-wagon</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0</version>
       </extension>
     </extensions>
   </build>
