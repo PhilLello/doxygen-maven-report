@@ -33,11 +33,11 @@ public class DoxygenReportMojo extends AbstractMavenReport
   /**
    * Directory for work file(s).
    *
-   * @parameter expression="${project.build.directory}/doxygen"
+   * @parameter expression="${project.build.directory}"
    * @required
    * @readonly
    */
-  private String workDirectory;
+  private String buildDirectory;
 
   /**
    * @parameter default-value="${project}"
@@ -45,6 +45,27 @@ public class DoxygenReportMojo extends AbstractMavenReport
    * @readonly
    */
   private MavenProject project;
+ 
+  /**
+   * @parameter default-value="${project.name}"
+   * @required
+   * @readonly
+   */
+  private String projectName;
+ 
+  /**
+   * @parameter default-value="${project.version}"
+   * @required
+   * @readonly
+   */
+  private String projectVersion;
+ 
+  /**
+   * @parameter default-value="${project.build.sourceDirectory}"
+   * @required
+   * @readonly
+   */
+  private String sourceDirectory;
  
   /**
    * @component
@@ -67,8 +88,17 @@ public class DoxygenReportMojo extends AbstractMavenReport
     BufferedReader processOutput, processErrors;
     FileWriter configFileWriter;
     BufferedWriter configWriter;
+    String workDirectory = buildDirectory+File.separator+"doxygen";
     String doxyfile = workDirectory+File.separator+"Doxyfile";
     String[] args = { "doxygen", doxyfile };
+    if (!options.containsKey("PROJECT_NAME"))
+      options.put("PROJECT_NAME", "\""+projectName+"\"");
+    if (!options.containsKey("PROJECT_VERSION"))
+      options.put("PROJECT_VERSION", "\""+projectVersion+"\"");
+    if (!options.containsKey("OUTPUT_DIRECTORY"))
+      options.put("OUTPUT_DIRECTORY", "\""+outputDirectory+File.separator+"doxygen\"");
+    if (!options.containsKey("INPUT"))
+      options.put("INPUT", "\""+sourceDirectory+"\"");
     try {
     File f = new File(workDirectory);
     f.mkdirs();

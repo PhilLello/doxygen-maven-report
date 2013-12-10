@@ -1,0 +1,30 @@
+Getting Started
+
+  The minimal recommended configuration is:
+
++-----+
+<project>
+  ...
+  <reporting>
+    ...
+    <plugins>
+      <plugin>
+        <groupId>com.pcl-solutions.maven.reports</groupId>
+        <artifactId>doxygen-maven-report</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <configuration>
+          <options>
+            <INPUT>src</INPUT>
+            <RECURSIVE>yes</RECURSIVE>
+            <GENERATE_TREEVIEW>yes</GENERATE_TREEVIEW>
+            <OUTPUT_DIRECTORY>target/site/doxygen</OUTPUT_DIRECTORY>
+          </options>
+        </configuration>
+      </plugin>
+    </plugins>
+    ...
+  </reporting>
+  ...
+</project>
++-----+
+
