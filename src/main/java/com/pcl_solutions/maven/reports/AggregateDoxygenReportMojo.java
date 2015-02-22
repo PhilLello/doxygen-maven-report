@@ -20,49 +20,46 @@ public class AggregateDoxygenReportMojo extends AbstractDoxygenReportMojo {
 	@Override
 	public void configureInputs() {
 		getLog().debug("Configuring inputs for aggregate report");
-		if (!getOptions().containsKey("INPUT")) {
 
-			boolean inputSettings = false;
+		boolean inputSettings = false;
 
-			if (getInputs() != null && getInputs().length > 0) {
-				inputSettings = true;
-			}
+		if (getInputs() != null && getInputs().length > 0) {
+			inputSettings = true;
+		}
 
-			StringBuilder doxygenInputs = new StringBuilder();
-			for (MavenProject subProject : getReactorProjects()) {
-				getLog().debug("sub project: " + subProject);
-				subProject.getBasedir();
+		StringBuilder doxygenInputs = new StringBuilder();
+		for (MavenProject subProject : getReactorProjects()) {
+			getLog().debug("sub project: " + subProject);
+			subProject.getBasedir();
 
-				if (inputSettings) {
-					String root = subProject.getBasedir().getAbsolutePath();
+			if (inputSettings) {
+				String root = subProject.getBasedir().getAbsolutePath();
 
-					if (!root.endsWith("/") && !root.endsWith("\\")) {
-						root = root + File.separator;
-					}
+				if (!root.endsWith("/") && !root.endsWith("\\")) {
+					root = root + File.separator;
+				}
 
-					for (String input : getInputs()) {
-						String fullInput = root + input;
-						getLog().debug("Adding input: " + fullInput);
-						doxygenInputs.append("\"");
-						doxygenInputs.append(fullInput);
-						doxygenInputs.append("\"");
-						doxygenInputs.append(" \\");
-						doxygenInputs.append("\n");
-					}
-				} else {
+				for (String input : getInputs()) {
+					String fullInput = root + input;
+					getLog().debug("Adding input: " + fullInput);
 					doxygenInputs.append("\"");
-					doxygenInputs.append(""); // source directory
+					doxygenInputs.append(fullInput);
 					doxygenInputs.append("\"");
 					doxygenInputs.append(" \\");
 					doxygenInputs.append("\n");
 				}
+			} else {
+				doxygenInputs.append("\"");
+				doxygenInputs.append(""); // source directory
+				doxygenInputs.append("\"");
+				doxygenInputs.append(" \\");
+				doxygenInputs.append("\n");
 			}
-
-			String fullInputs = doxygenInputs.substring(0,
-					doxygenInputs.length() - " /\n".length());
-
-			getOptions().put("INPUT", fullInputs);
 		}
 
+		String fullInputs = doxygenInputs.substring(0, doxygenInputs.length()
+				- " /\n".length());
+
+		getOptions().put("INPUT", fullInputs);
 	}
 }

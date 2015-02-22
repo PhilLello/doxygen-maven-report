@@ -196,7 +196,9 @@ public abstract class AbstractDoxygenReportMojo extends AbstractMavenReport {
 					"\"" + getOutputDirectory() + File.separator + "doxygen\"");
 		}
 
-		configureInputs();
+		if (!getOptions().containsKey("INPUT")) {
+			configureInputs();
+		}
 		try {
 			File f = new File(workDirectory);
 			f.mkdirs();
