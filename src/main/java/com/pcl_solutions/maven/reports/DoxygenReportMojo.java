@@ -1,180 +1,47 @@
 package com.pcl_solutions.maven.reports;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import org.apache.maven.doxia.siterenderer.Renderer;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.reporting.AbstractMavenReport;
-import org.apache.maven.reporting.MavenReportException;
 
 /**
  * @author Phil Lello
- *
+ * 
  * @goal doxygen
  * @phase site
  */
-public class DoxygenReportMojo extends AbstractMavenReport
-{
-  /**
-   * Directory where reports will go.
-   *
-   * @parameter expression="${project.reporting.outputDirectory}"
-   * @required
-   * @readonly
-   */
-  private String outputDirectory;
- 
-  /**
-   * Directory for work file(s).
-   *
-   * @parameter expression="${project.build.directory}"
-   * @required
-   * @readonly
-   */
-  private String buildDirectory;
+public class DoxygenReportMojo extends AbstractDoxygenReportMojo {
 
-  /**
-   * @parameter default-value="${project}"
-   * @required
-   * @readonly
-   */
-  private MavenProject project;
- 
-  /**
-   * @parameter default-value="${project.name}"
-   * @required
-   * @readonly
-   */
-  private String projectName;
- 
-  /**
-   * @parameter default-value="${project.version}"
-   * @required
-   * @readonly
-   */
-  private String projectVersion;
- 
-  /**
-   * @parameter default-value="${project.build.sourceDirectory}"
-   * @required
-   * @readonly
-   */
-  private String sourceDirectory;
- 
-  /**
-   * @component
-   * @required
-   * @readonly
-   */
-  private Renderer siteRenderer;
+	public boolean isAggregate() {
+		return false;
+	}
 
-  /**
-   * Doxygen configuration map
-   *
-   * @parameter
-   */
-  private Map<String,String> options;
+	@Override
+	public void configureInputs() {
+		getLog().debug("Configuring inputs for single report");
 
-  public void executeReport(Locale defaultLocale) throws MavenReportException
-  {
-    String line;
-    Process process;
-    BufferedReader processOutput, processErrors;
-    FileWriter configFileWriter;
-    BufferedWriter configWriter;
-    String workDirectory = buildDirectory+File.separator+"doxygen";
-    String doxyfile = workDirectory+File.separator+"Doxyfile";
-    String[] args = { "doxygen", doxyfile };
-    if (!options.containsKey("PROJECT_NAME"))
-      options.put("PROJECT_NAME", "\""+projectName+"\"");
-    if (!options.containsKey("PROJECT_VERSION"))
-      options.put("PROJECT_VERSION", "\""+projectVersion+"\"");
-    if (!options.containsKey("OUTPUT_DIRECTORY"))
-      options.put("OUTPUT_DIRECTORY", "\""+outputDirectory+File.separator+"doxygen\"");
-    if (!options.containsKey("INPUT"))
-      options.put("INPUT", "\""+sourceDirectory+"\"");
-    try {
-    File f = new File(workDirectory);
-    f.mkdirs();
-    f = new File(doxyfile);
-    if (!f.exists())
-      f.createNewFile();
-    configFileWriter = new FileWriter(f.getAbsoluteFile());
-    configWriter = new BufferedWriter(configFileWriter);
-    for (Map.Entry<String, String> entry : options.entrySet())
-    {
-      configWriter.write(entry.getKey()+"="+entry.getValue()+"\n");
-    }
-    configWriter.close();
-    process = Runtime.getRuntime().exec(args);
-    processOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
-    processErrors = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-    boolean processAlive = true;
-    do {
-      while (processOutput.ready()) {
-        line = processOutput.readLine();
-        if (line != null) getLog().info(line);
-      }
-      while (processErrors.ready()) {
-        line = processErrors.readLine();
-        if (line != null) getLog().error(line);
-      }
-      try {
-        process.exitValue();
-        processAlive = false;
-      } catch (IllegalThreadStateException e) {
-      }
-    } while (processAlive);
-    process.waitFor();
-    } catch (Exception e) {
-      getLog().error(e);
-    }
-  }
+		if (getInputs() != null && getInputs().length > 0) {
+			StringBuilder doxygenInputs = new StringBuilder();
+			String root = getBaseDir();
+			if (!root.endsWith("/") && !root.endsWith("\\")) {
+				root = root + File.separator;
+			}
 
-  protected MavenProject getProject()
-  {
-    return project;
-  }
- 
-  protected String getOutputDirectory()
-  {
-    return outputDirectory;
-  }
- 
-  protected Renderer getSiteRenderer()
-  {
-    return siteRenderer;
-  }
- 
-  public String getDescription( Locale locale )
-  {
-    return getBundle( locale ).getString( "report.myreport.description" );
-  }
- 
-  public String getName( Locale locale )
-  {
-    return getBundle( locale ).getString( "report.myreport.name" );
-  }
- 
-  public String getOutputName()
-  {
-    return "doxygen/html/index";
-  }
- 
-  private ResourceBundle getBundle( Locale locale )
-  {
-    return ResourceBundle.getBundle( "doxygen", locale, this.getClass().getClassLoader() );
-  }
+			for (String input : getInputs()) {
+				String fullInput = root + input;
+				getLog().debug("Adding input: " + fullInput);
+				doxygenInputs.append("\"");
+				doxygenInputs.append(fullInput);
+				doxygenInputs.append("\"");
+				doxygenInputs.append(" \\");
+				doxygenInputs.append("\n");
+			}
 
-  public boolean isExternalReport()
-  {
-    return true;
-  }
+			String fullInputs = doxygenInputs.substring(0,
+					doxygenInputs.length() - " /\n".length());
+
+			getOptions().put("INPUT", fullInputs);
+		} else {
+			getOptions().put("INPUT", "\"" + getSourceDirectory() + "\"");
+		}
+	}
+
 }
-
