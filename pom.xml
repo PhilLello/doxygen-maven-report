@@ -1,19 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	
 	<groupId>com.pcl-solutions.maven.reports</groupId>
 	<artifactId>doxygen-maven-report</artifactId>
 	<version>1.2-SNAPSHOT</version>
 	<packaging>maven-plugin</packaging>
 	<name>Doxygen Maven Report</name>
-	
 	<organization>
-		<name>PCL Solutions</name>
+		<name>Dunlop-Lello Consulting LTD</name>
 		<url>http://www.pcl-solutions.com</url>
 	</organization>
 	<inceptionYear>2013</inceptionYear>
-	<description>This project is an implementation of a doxygen report, using external doxygen</description>
+	<description>This project is an implementation of a doxygen report, using external doxygen.</description>
 	<url>http://www.pcl-solutions.com/maven/${project.artifactId}</url>
 	<licenses>
 		<license>
@@ -26,7 +24,7 @@
 		<developer>
 			<id>phil.lello</id>
 			<name>Phil Lello</name>
-			<organization>PCL Solutions</organization>
+			<organization>Dunlop-Lello Consulting LTD</organization>
 			<roles>
 				<role>developer</role>
 			</roles>
@@ -46,6 +44,17 @@
 		<version>7</version>
 	</parent>
 	<build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <configuration>
+                        <skipDeploy>true</skipDeploy>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -59,21 +68,19 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>3.3</version>
-				<dependencies>
-					<dependency>
-						<groupId>org.apache.maven.wagon</groupId>
-						<artifactId>wagon-ftp</artifactId>
-						<version>2.5</version>
-					</dependency>
-				</dependencies>
+				<version>3.4</version>
 				<executions>
 					<execution>
+                        <phase>post-site</phase>
 						<goals>
-							<goal>site</goal>
-							<goal>deploy</goal>
+							<goal>stage</goal>
 						</goals>
-						<phase>deploy</phase>
+                        <configuration>
+                            <skipDeploy>false</skipDeploy>
+                            <content>${project.build.directory}/site</content>
+                            <scmBranch>gh-pages</scmBranch>
+                            <pubScmUrl>scm:git:https://github.com/PhilLello/doxygen-maven-report</pubScmUrl>
+                        </configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -89,6 +96,20 @@
 					</execution>
 				</executions>
 			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-publish-plugin</artifactId>
+                <version>1.1</version>
+                <executions>
+                    <execution>
+                        <id>scm-publish</id>
+                        <phase>site-deploy</phase>
+                        <goals>
+                            <goal>publish-scm</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -102,6 +123,28 @@
 					</execution>
 				</executions>
 			</plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.7</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/site</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}</directory>
+                                    <include>pom.xml</include>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
@@ -120,13 +163,6 @@
 				</executions>
 			</plugin>
 		</plugins>
-		<extensions>
-			<extension>
-				<groupId>com.pcl-solutions.maven.wagons</groupId>
-				<artifactId>rsync-maven-wagon</artifactId>
-				<version>1.0</version>
-			</extension>
-		</extensions>
 	</build>
 	<dependencies>
 		<dependency>
@@ -157,12 +193,10 @@
 	</dependencies>
 	<reporting>
 		<plugins>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-javadoc-plugin</artifactId> 
-				<version>2.9.1</version> </plugin> -->
 			<plugin>
 				<groupId>com.pcl-solutions.maven.reports</groupId>
 				<artifactId>doxygen-maven-report</artifactId>
-				<version>1.0-SNAPSHOT</version>
+				<version>1.2-SNAPSHOT</version>
 				<configuration>
 					<options>
 						<RECURSIVE>yes</RECURSIVE>
@@ -174,8 +208,8 @@
 	</reporting>
 	<distributionManagement>
 		<site>
-			<id>pcl-solutions.com</id>
-			<url>rsync:www.pcl-solutions.com:/home/pclsolut/public_html/maven/${project.artifactId}/${project.version}</url>
+            <id>phillello-github</id>
+            <url>scm:git:https://github.com/PhilLello/doxygen-maven-report</url>
 		</site>
 	</distributionManagement>
 </project>
